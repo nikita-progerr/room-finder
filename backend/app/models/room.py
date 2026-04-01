@@ -3,6 +3,20 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 
+class Building(Base):
+    """Корпус учебного заведения"""
+    __tablename__ = "buildings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    code: Mapped[str] = mapped_column(String(20), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(100))
+    address: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+
+    def __repr__(self):
+        return f"<Building {self.code}: {self.name}>"
+
+
 class Room(Base):
     """Аудитория"""
     __tablename__ = "rooms"

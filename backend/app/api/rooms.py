@@ -11,6 +11,15 @@ from sqlalchemy import select
 router = APIRouter(prefix="/rooms", tags=["Аудитории"])
 
 
+@router.get("/buildings", summary="Все корпуса")
+async def get_buildings(db: AsyncSession = Depends(get_db)):
+    """Возвращает список всех корпусов"""
+    from app.models.room import Building
+    stmt = select(Building).where(Building.is_active == True).order_by(Building.code)
+    result = await db.execute(stmt)
+    return result.scalars().all()
+
+
 @router.get("/free", response_model=list[RoomFreeOut], summary="Найти свободные аудитории")
 async def get_free_rooms(
     time_start: Optional[str] = Query(None, example="09:00", description="Начало HH:MM"),
@@ -21,6 +30,7 @@ async def get_free_rooms(
     has_projector: Optional[bool] = Query(None),
     has_computers: Optional[bool] = Query(None),
     week_number: Optional[int] = Query(None, ge=1, description="Номер недели"),
+    week_start_date: Optional[str] = Query(None, description="Дата начала недели (Пн) в формате YYYY-MM-DD"),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -39,6 +49,7 @@ async def get_free_rooms(
         has_projector=has_projector,
         has_computers=has_computers,
         week_number=week_number,
+        week_start_date=week_start_date,
     )
     rooms = await find_free_rooms(db, query)
     return rooms
@@ -71,8 +82,9 @@ async def get_room(room_id: int, db: AsyncSession = Depends(get_db)):
 async def get_room_schedule_endpoint(
     room_id: int,
     day_of_week: Optional[int] = Query(None, ge=0, le=6),
+    week_start_date: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
     """Расписание конкретной аудитории (по дням или весь)"""
-    entries = await get_room_schedule(db, room_id, day_of_week)
+    entries = await get_room_schedule(db, room_id, day_of_week, week_start_date)
     return entries

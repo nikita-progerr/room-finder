@@ -24,27 +24,50 @@ export default function HomePage() {
       <div className="relative z-10">
         <Header />
 
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <main className="w-full max-w-[1600px] mx-auto px-3 sm:px-4 py-8 pb-24">
           {/* Hero */}
-          <div className="mb-10 animate-fade-in">
-            <h2 className="text-4xl font-bold text-white tracking-tight">
+          <div className="mb-8 animate-fade-in">
+            <h2 className="text-4xl sm:text-5xl font-bold tracking-tight" style={{
+              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+              color: "#bfdbfe",
+              letterSpacing: "-0.02em",
+              textShadow: "0 0 40px rgba(59, 130, 246, 0.5)",
+            }}>
               Свободные аудитории
             </h2>
-            <p className="text-slate-400 mt-2 text-base">
+            <p className="mt-3 text-base" style={{
+              color: "#94a3b8",
+              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            }}>
               СарФТИ НИЯУ МИФИ · Найдите аудиторию прямо сейчас
             </p>
           </div>
 
           {/* Layout */}
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
-            <aside className="w-full lg:w-72 shrink-0 lg:-translate-x-2">
+          <div className="flex flex-col lg:flex-row gap-6 items-start">
+            <aside className="w-full lg:w-80 shrink-0">
               <SearchFilters />
             </aside>
-            <section className="flex-1 min-w-0 lg:translate-x-2">
+            <section className="flex-1 min-w-0">
               <RoomList />
             </section>
           </div>
         </main>
+
+        <footer className="w-full max-w-[1600px] mx-auto px-3 sm:px-4 py-8 mt-8 border-t border-white/10">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm font-medium" style={{ color: "#94a3b8" }}>
+              СарФТИ НИЯУ МИФИ
+            </div>
+            <div className="text-sm text-center" style={{ color: "#64748b" }}>
+              YT: @nikITa_in_IT, nikita_nikita_savelev@mail.ru, TG: Nikita_luvIT
+            </div>
+            <div className="text-sm flex items-center gap-1" style={{ color: "#64748b" }}>
+              <span>©</span>
+              <span>2026</span>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

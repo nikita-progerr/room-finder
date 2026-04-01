@@ -1,8 +1,58 @@
-from sqlalchemy import String, Integer, ForeignKey, Date, Time, DateTime, Text
+from sqlalchemy import String, Integer, ForeignKey, Date, Time, DateTime, Text, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from datetime import date, time, datetime
+from typing import TYPE_CHECKING, Optional
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.room import Room
+
+
+class TimeSlot(Base):
+    """Временной слот (академический час)"""
+    __tablename__ = "time_slots"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    slot_number: Mapped[int] = mapped_column(Integer, unique=True, index=True)
+    time_start: Mapped[time] = mapped_column(Time, index=True)
+    time_end: Mapped[time] = mapped_column(Time, index=True)
+    label: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    duration_type: Mapped[str] = mapped_column(String(20), default="standard")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    def __repr__(self):
+        return f"<TimeSlot {self.slot_number}: {self.time_start}-{self.time_end}>"
+
+
+class LessonType(Base):
+    """Тип занятия (лекция, практика и т.д.)"""
+    __tablename__ = "lesson_types"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    code: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(100))
+    short_name: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    color: Mapped[str | None] = mapped_column(String(7), nullable=True)
+
+    def __repr__(self):
+        return f"<LessonType {self.code}>"
+
+
+class Teacher(Base):
+    """Преподаватель"""
+    __tablename__ = "teachers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    full_name: Mapped[str] = mapped_column(String(150), unique=True, index=True)
+    position: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    department: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    email: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    def __repr__(self):
+        return f"<Teacher {self.full_name}>"
 
 
 class ScheduleEntry(Base):
@@ -11,31 +61,36 @@ class ScheduleEntry(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     room_id: Mapped[int] = mapped_column(Integer, ForeignKey("rooms.id"), index=True)
+    teacher_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("teachers.id"), nullable=True)
 
-    # Временные параметры
     day_of_week: Mapped[int] = mapped_column(Integer, index=True)
-    # 0=Пн, 1=Вт, 2=Ср, 3=Чт, 4=Пт, 5=Сб, 6=Вс
+    week_start_date: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
     week_type: Mapped[str] = mapped_column(String(10), default="both")
-    # "odd" = нечётная, "even" = чётная, "both" = каждую
 
     time_start: Mapped[time] = mapped_column(Time, index=True)
     time_end: Mapped[time] = mapped_column(Time)
 
-    # Информация о занятии
+    time_slot_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("time_slots.id"), nullable=True
+    )
+    lesson_type_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("lesson_types.id"), nullable=True
+    )
+
+    date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    is_recurring: Mapped[bool] = mapped_column(Boolean, default=True)
+
     subject: Mapped[str] = mapped_column(String(200))
     teacher: Mapped[str | None] = mapped_column(String(150), nullable=True)
     group_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     lesson_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    # lecture, practice, lab, seminar
 
-    # Мета
     source_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now()
     )
 
-    # Relationships
     room = relationship("Room", back_populates="schedule_entries")
 
     def __repr__(self):

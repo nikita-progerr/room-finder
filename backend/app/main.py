@@ -5,7 +5,7 @@ import logging
 
 from app.core.config import settings
 from app.core.database import init_db
-from app.api import rooms, admin, schedule
+from app.api import rooms, admin, schedule, schedule_api
 
 logging.basicConfig(
     level=logging.INFO,
@@ -51,9 +51,10 @@ app.add_middleware(
 )
 
 # Роутеры
-app.include_router(rooms.router,    prefix="/api/v1")
-app.include_router(admin.router,    prefix="/api/v1")
-app.include_router(schedule.router, prefix="/api/v1")
+app.include_router(rooms.router,     prefix="/api/v1")
+app.include_router(admin.router,     prefix="/api/v1")
+app.include_router(schedule.router,  prefix="/api/v1")
+app.include_router(schedule_api.router, prefix="/api/v1")
 
 
 @app.get("/", tags=["Health"])
