@@ -99,10 +99,16 @@ async def find_free_rooms(
     
     # Условие для фильтрации по неделе
     if query.week_start_date:
-        # Фильтр: только конкретная неделя (без повторяющихся)
+        # Фильтр: конкретная неделя + повторяющиеся занятия без конкретной даты
         from datetime import date
         week_date = date.fromisoformat(query.week_start_date)
-        week_condition = ScheduleEntry.week_start_date == week_date
+        week_condition = or_(
+            ScheduleEntry.week_start_date == week_date,
+            and_(
+                ScheduleEntry.week_start_date == None,
+                ScheduleEntry.week_type.in_([week_type, "both"]),
+            ),
+        )
     else:
         # Фильтр по чётности недели (повторяющиеся занятия)
         week_condition = ScheduleEntry.week_type.in_([week_type, "both"])
@@ -175,7 +181,13 @@ async def _get_free_until(
     if week_start_date:
         from datetime import date
         week_date = date.fromisoformat(week_start_date)
-        week_condition = ScheduleEntry.week_start_date == week_date
+        week_condition = or_(
+            ScheduleEntry.week_start_date == week_date,
+            and_(
+                ScheduleEntry.week_start_date == None,
+                ScheduleEntry.week_type.in_([week_type, "both"]),
+            ),
+        )
     else:
         week_condition = ScheduleEntry.week_type.in_([week_type, "both"])
     

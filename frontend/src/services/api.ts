@@ -11,8 +11,12 @@ const api = axios.create({
 export async function getFreeRooms(filters: SearchFilters): Promise<FreeRoom[]> {
   const params: Record<string, string | number | boolean> = {};
 
-  if (filters.time_start)  params.time_start  = filters.time_start;
-  if (filters.time_end)    params.time_end    = filters.time_end;
+  if (filters.time_start !== undefined && filters.time_start !== "") {
+    params.time_start = filters.time_start;
+  }
+  if (filters.time_end !== undefined && filters.time_end !== "") {
+    params.time_end = filters.time_end;
+  }
   if (filters.day_of_week !== undefined) params.day_of_week = filters.day_of_week;
   if (filters.building)    params.building    = filters.building;
   if (filters.min_capacity) params.min_capacity = filters.min_capacity;

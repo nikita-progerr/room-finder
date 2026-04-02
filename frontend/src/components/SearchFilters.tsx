@@ -1,6 +1,7 @@
 "use client";
 
 import { useRoomStore } from "@/store/roomStore";
+import { getFreeRooms } from "@/services/api";
 import { DAYS_RU } from "@/types";
 import { Search, RotateCcw, Zap, SlidersHorizontal } from "lucide-react";
 import clsx from "clsx";
@@ -30,19 +31,32 @@ export default function SearchFiltersPanel() {
   
   useEffect(() => {
     const now = new Date();
-    now.setHours(now.getHours() + 3);
+    const currentHour = String(now.getHours()).padStart(2, '0');
+    const currentMinute = String(now.getMinutes()).padStart(2, '0');
+    const timeStart = `${currentHour}:${currentMinute}`;
+    
+    const endDate = new Date(now.getTime() + 90 * 60 * 1000);
+    const endHour = String(endDate.getHours()).padStart(2, '0');
+    const endMinute = String(endDate.getMinutes()).padStart(2, '0');
+    const timeEnd = `${endHour}:${endMinute}`;
     
     const day = now.getDay();
     const diff = now.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(now);
     monday.setDate(diff);
     const weekStartDate = monday.toISOString().split('T')[0];
+    const dayOfWeek = day === 0 ? 6 : day - 1;
     
     setFilters({ 
       week_start_date: weekStartDate,
-      time_start: "",
-      time_end: "",
+      day_of_week: dayOfWeek,
+      time_start: timeStart,
+      time_end: timeEnd,
     });
+    
+    setTimeout(() => {
+      searchRooms();
+    }, 0);
   }, []);
 
   return (
